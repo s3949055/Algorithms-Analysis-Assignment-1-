@@ -2,15 +2,15 @@ from spreadsheet.baseSpreadsheet import BaseSpreadsheet
 from spreadsheet.cell import Cell
 
 
-# class ListNode:
-#     '''
-#     Define a node in the linked list
-#     '''
-#
-#     def __init__(self, word_frequency: WordFrequency):
-#         self.word_frequency = word_frequency
-#         self.next = None
+class ListNode:
+    '''
+    Define a node in the linked list
+    '''
 
+    def __init__(self, value: float):
+        self.value = value
+        self.next = None
+        self.prev = None
 # ------------------------------------------------------------------------
 # This class  is required TO BE IMPLEMENTED
 # Linked-List-based spreadsheet implementation.
@@ -22,7 +22,10 @@ from spreadsheet.cell import Cell
 class LinkedListSpreadsheet(BaseSpreadsheet):
 
     def __init__(self):
-        # TO BE IMPLEMENTED
+        self.row_head = self.ListNode(None)  # sentinel node for the row linked list
+        self.col_head = self.ListNode(None)  # sentinel node for the column linked list
+        self.row_head.next = self.col_head.prev = self.ListNode(None)  # create the first node in each list
+        self.row_size = self.col_size = 0  # size of the spreadsheet
         pass
 
 
@@ -32,7 +35,8 @@ class LinkedListSpreadsheet(BaseSpreadsheet):
         @param lCells: list of cells to be stored
         """
 
-        # TO BE IMPLEMENTED
+        for cell in lCells:
+            self.update(cell.row, cell.col, cell.value)
         pass
 
 
@@ -41,7 +45,12 @@ class LinkedListSpreadsheet(BaseSpreadsheet):
         Appends an empty row to the spreadsheet.
         """
 
-        # TO BE IMPLEMENTED
+        new_row_node = self.ListNode(None)
+        new_row_node.prev = self.row_head.prev
+        new_row_node.next = self.row_head.prev.next
+        new_row_node.prev.next = new_row_node.next.prev = new_row_node
+        self.row_size += 1
+
         pass
 
 
@@ -51,7 +60,11 @@ class LinkedListSpreadsheet(BaseSpreadsheet):
 
         @return True if operation was successful, or False if not.
         """
-        # TO BE IMPLEMENTED
+        new_col_node = self.ListNode(None)
+        new_col_node.prev = self.col_head.prev
+        new_col_node.next = self.col_head.prev.next
+        new_col_node.prev.next = new_col_node.next.prev = new_col_node
+        self.col_size += 1
         pass
 
 
@@ -64,10 +77,16 @@ class LinkedListSpreadsheet(BaseSpreadsheet):
         @return True if operation was successful, or False if not, e.g., rowIndex is invalid.
         """
 
-        # TO BE IMPLEMENTED
-        pass
-
-        # REPLACE WITH APPROPRIATE RETURN VALUE
+        if rowIndex < 0 or rowIndex > self.row_size:
+            return False
+        new_row_node = self.ListNode(None)
+        curr_row_node = self.row_head.next
+        for i in range(rowIndex):
+            curr_row_node = curr_row_node.next
+        new_row_node.prev = curr_row_node.prev
+        new_row_node.next = curr_row_node
+        new_row_node.prev.next = new_row_node.next.prev = new_row_node
+        self.row_size += 1
         return True
 
 
@@ -78,11 +97,15 @@ class LinkedListSpreadsheet(BaseSpreadsheet):
         @param colIndex Index of the existing column that will be before the newly inserted row.  If inserting as first column, specify colIndex to be -1.
         """
 
-        # TO BE IMPLEMENTED
-        pass
-
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        return True
+        if colIndex < -1 or colIndex >= self.col_size:
+            return False
+        new_col_node = self.ListNode(None)
+        curr_col_node = self.col_head.next
+        for i in range(colIndex):
+            curr_col_node = curr_col_node.next
+        new_col_node.prev = curr_col_node.prev
+        new_col_node.next = curr_col_node
+        new_col_node.prev.next = new_col_node
 
 
     def update(self, rowIndex: int, colIndex: int, value: float) -> bool:
