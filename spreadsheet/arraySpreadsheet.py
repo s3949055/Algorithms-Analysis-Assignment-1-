@@ -10,13 +10,14 @@ from spreadsheet.baseSpreadsheet import BaseSpreadsheet
 # __copyright__ = 'Copyright 2023, RMIT University'
 # ------------------------------------------------------------------------
 
-class ArraySpreadsheet(BaseSpreadsheet):
+class ArraySpreadsheet(BaseSpreadsheet):  
 
     def __init__(self):
-        # TO BE IMPLEMENTED
+        # Initialise an empty spreadsheet, numRows and numCols set to 0 
+        self.spreadsheet = []
+        self.numRows = 0
+        self.numCols = 0
 
-        self._grid = []
-        # pass
 
     def buildSpreadsheet(self, lCells: [Cell]):
         """
@@ -24,18 +25,17 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @param lCells: list of cells to be stored
         """
 
-        # TO BE IMPLEMENTED
+        # Determine the number of rows and columns needed based on the cells
+        numRows = max(cell.row for cell in lCells) + 1
+        numCols = max(cell.col for cell in lCells) + 1
 
-        nRows = max(cell.row for cell in lCells) + 1
-        nCols = max(cell.col for cell in lCells) + 1
-    
-        # Create a 2D array with size nRows x nCols
-        self._spreadsheet = [[None] * nCols for _ in range(nRows)]
-    
-        # Fill in the 2D array with the corresponding cell values
+        # Create 2D array to store cells
+        self.spreadsheet = [[None for j in range(numCols)] for i in range(numRows)]
+
+        # Add cells to the 2D array
         for cell in lCells:
-            self._spreadsheet[cell.row][cell.col] = cell.value
-        # pass
+            self.spreadsheet[cell.row][cell.col] = cell
+
 
 
     def appendRow(self)->bool:
@@ -45,20 +45,12 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return True if operation was successful, or False if not.
         """
 
-        # TO BE IMPLEMENTED
-
         # Add a new empty row to the spreadsheet
-        self._cells.append([None] * self.colNum())
-
+        self.spreadsheet.extend([[None] * self.numCols for x in range(1)])
         # Update row count
-        self._rowCount += 1
-
-        # Return True to indicate successful operation
+        self.numRows += 1
         return True
-        #pass
 
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        # return True
 
 
     def appendCol(self)->bool:
@@ -68,23 +60,11 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return True if operation was successful, or False if not.
         """
 
-        # TO BE IMPLEMENTED
-
-        if not self._spreadsheet:
-        # If spreadsheet is empty, create a new row and add a cell to it.
-            self._spreadsheet = [[Cell()]]
-            
-        else:
-        # Otherwise, append a new cell to each existing row.
-            for row in self._spreadsheet:
-                row.append(Cell())
-
+        # Append an empty column to the spreadsheet
+        for row in self.spreadsheet:
+                row.append(None)   
         return True
 
-        #pass
-
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return True
 
 
     def insertRow(self, rowIndex: int)->bool:
@@ -96,25 +76,16 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return True if operation was successful, or False if not, e.g., rowIndex is invalid.
         """
 
-        # TO BE IMPLEMENTED
-
-        # Check if rowIndex is valid
-        if rowIndex < 0 or rowIndex >= self.rowNum():
+        if rowIndex < -1 or rowIndex >= self.numRows:
             return False
 
-        # Shift all rows after rowIndex down by one
-        for i in range(self.rowNum()-1, rowIndex-1, -1):
-            for j in range(self.colNum()):
-                self._spreadsheet[i+1][j] = self._spreadsheet[i][j]
-
-        # Insert an empty row at rowIndex
-        self._spreadsheet[rowIndex] = [None] * self.colNum()
-
+        # Insert empty row into spreadsheet
+        row = [None] * self.numCols
+        self.spreadsheet.insert((rowIndex), row)
+        # Update row count
+        self.numRows += 1
         return True
-        #pass
 
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return True
 
 
     def insertCol(self, colIndex: int)->bool:
@@ -126,11 +97,16 @@ class ArraySpreadsheet(BaseSpreadsheet):
         return True if operation was successful, or False if not, e.g., colIndex is invalid.
         """
 
-        # TO BE IMPLEMENTED
-        pass
+        if colIndex < -1 or colIndex >= self.numCols:
+            return False
 
-        # REPLACE WITH APPROPRIATE RETURN VALUE
+        # Inserts empty column into spreadsheet
+        for x in self.spreadsheet:
+            x.insert((colIndex, None))
+        # Update column count
+        self.numCols += 1
         return True
+
 
 
     def update(self, rowIndex: int, colIndex: int, value: float) -> bool:
@@ -144,18 +120,15 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return True if cell can be updated.  False if cannot, e.g., row or column indices do not exist.
         """
 
-        # TO BE IMPLEMENTED
-        if colIndex < 0 or colIndex > self.colNum():
+        if rowIndex < -1 or rowIndex >= self.numRows:
+            return False
+        elif colIndex < -1 or colIndex >= self.numCols:
             return False
 
-        for i in range(self.rowNum()):
-            self._sheet[i].insert(colIndex, None)
-
+        # Update spreadsheet with value
+        self.spreadsheet[rowIndex][colIndex] = value
         return True
-        #pass
 
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return True
 
 
     def rowNum(self)->int:
@@ -163,12 +136,9 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return Number of rows the spreadsheet has.
         """
 
-        # TO BE IMPLEMENTED
-        return len(self._spreadsheet)
-        #pass
+        # Return number of rows
+        return self.numRows
 
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return 0
 
 
     def colNum(self)->int:
@@ -176,18 +146,8 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return Number of column the spreadsheet has.
         """
 
-        # TO BE IMPLEMENTED
-
-        if not self.cells:
-        # Spreadsheet is empty
-            return 0
-        else:
-        # Get the number of columns in the first row
-            return len(self.cells[0])
-        #pass
-
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return 0
+        # Return number of columns
+        return self.numCols
 
 
 
@@ -200,18 +160,14 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return List of cells (row, col) that contains the input value.
 	    """
 
-        # TO BE IMPLEMENTED
-
+        # Initialise a list
         matches = []
-        for row in range(self.rowNum()):
-            for col in range(self.colNum()):
-                if self._spreadsheet[row][col].getValue() == value:
+        # Nested for loop to search/find the 'value', if so then add to list
+        for row in range(self.numRows):
+            for col in range(self.numCols):
+                if self.spreadsheet[row][col].getValue() == value:
                     matches.append((row, col))
         return matches
-        #pass
-
-        # REPLACE WITH APPROPRIATE RETURN VALUE
-        #return []
 
 
 
@@ -220,15 +176,11 @@ class ArraySpreadsheet(BaseSpreadsheet):
         @return A list of cells that have values (i.e., all non None cells).
         """
 
-        # TO BE IMPLEMENTED
+        # Initialise a list
         cell_list = []
-        for row in range(self.rowNum()):
-            for col in range(self.colNum()):
-                cell = self._spreadsheet[row][col]
+        # Nested for loop to search/find the non-empty cells, if so then add to list
+        for row in range(self.numRows):
+            for col in range(self.numCols):
                 if cell is not None:
-                    cell_list.append(cell)
+                    cell_list.append(Cell(row,col, (self.spreadsheet[row][col])))
         return cell_list
-        #pass
-
-        # TO BE IMPLEMENTED
-        #return []
